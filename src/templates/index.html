@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" id="vp">
   <title>Minesweeper</title>
   <style>
     *, *::before, *::after {
@@ -13,20 +13,21 @@
     }
 
     :root {
-      --bg:             #eeeaff;
-      --card:           #ffffff;
-      --surface:        #f4f2ff;
-      --cell:           #ddd8ff;
-      --cell-press:     #ccc5ff;
-      --cell-revealed:  #f0eeff;
-      --accent:         #7c6ff7;
-      --accent-dim:     rgba(124,111,247,.12);
-      --danger:         #ff7096;
-      --danger-dim:     rgba(255,112,150,.15);
-      --text:           #1a1530;
-      --muted:          #9490b5;
-      --border:         rgba(124,111,247,.18);
-      --shadow:         rgba(124,111,247,.14);
+      --bg:             #fdf0d0;
+      --card:           #fffdf5;
+      --surface:        #fef5dc;
+      --cell:           #dfc87a;
+      --cell-press:     #cfb455;
+      --cell-revealed:  #f9edcc;
+      --cell-flagged:   #e07a38;
+      --accent:         #a86800;
+      --accent-dim:     rgba(168,104,0,.13);
+      --danger:         #c93a3a;
+      --danger-dim:     rgba(201,58,58,.15);
+      --text:           #2a1600;
+      --muted:          #9a7c3a;
+      --border:         rgba(168,104,0,.22);
+      --shadow:         rgba(168,104,0,.16);
       --cell-size:      36px;
     }
 
@@ -53,7 +54,7 @@
       margin-bottom: 1.1rem;
     }
 
-    /* ── Card wrapper ──────────────────────────────────────────────── */
+    /* ── Card ──────────────────────────────────────────────────────── */
 
     .card {
       background: var(--card);
@@ -61,14 +62,13 @@
       box-shadow: 0 8px 32px var(--shadow);
       padding: 1.1rem 1rem 1.25rem;
       width: 100%;
-      max-width: 460px;
       display: flex;
       flex-direction: column;
       align-items: center;
       gap: .85rem;
     }
 
-    /* ── Difficulty tabs ───────────────────────────────────────────── */
+    /* ── Tabs ──────────────────────────────────────────────────────── */
 
     .tabs {
       display: flex;
@@ -102,14 +102,11 @@
       width: 100%;
       overflow: hidden;
       max-height: 0;
-      transition: max-height .3s ease, opacity .25s ease;
       opacity: 0;
+      transition: max-height .3s ease, opacity .25s ease;
     }
 
-    .custom-panel.open {
-      max-height: 130px;
-      opacity: 1;
-    }
+    .custom-panel.open { max-height: 130px; opacity: 1; }
 
     .custom-inner {
       display: flex;
@@ -159,9 +156,8 @@
       font-weight: 700;
       cursor: pointer;
       white-space: nowrap;
-      letter-spacing: .03em;
-      transition: opacity .15s;
       margin-bottom: 1px;
+      transition: opacity .15s;
     }
 
     .custom-play:active { opacity: .8; }
@@ -188,13 +184,13 @@
     }
 
     .lcd {
-      background: #1a1530;
+      background: #2a1600;
       border-radius: 8px;
       padding: .3rem .55rem;
       font-family: 'Courier New', monospace;
       font-size: 1.25rem;
       font-weight: 700;
-      color: #c9b8ff;
+      color: #ffc845;
       min-width: 3.4rem;
       text-align: center;
       letter-spacing: .08em;
@@ -275,7 +271,7 @@
       cursor: pointer;
       font-size: calc(var(--cell-size) * .5);
       font-weight: 800;
-      box-shadow: 0 2px 0 rgba(0,0,0,.08), inset 0 1px 0 rgba(255,255,255,.6);
+      box-shadow: 0 2px 0 rgba(0,0,0,.1), inset 0 1px 0 rgba(255,255,255,.55);
       transition: background .08s, box-shadow .08s;
       touch-action: manipulation;
       -webkit-touch-callout: none;
@@ -283,40 +279,33 @@
 
     .cell:not(.revealed):active {
       background: var(--cell-press);
-      box-shadow: 0 0 0 rgba(0,0,0,.08), inset 0 1px 3px rgba(0,0,0,.1);
+      box-shadow: inset 0 1px 3px rgba(0,0,0,.12);
     }
 
     .cell.revealed {
       background: var(--cell-revealed);
-      box-shadow: inset 0 1px 3px rgba(0,0,0,.06);
+      box-shadow: inset 0 1px 3px rgba(0,0,0,.07);
       cursor: default;
     }
 
-    .cell.flagged { background: var(--accent-dim); }
-
-    .cell.mine {
-      background: var(--danger-dim);
-      box-shadow: none;
+    .cell.flagged {
+      background: var(--cell-flagged);
+      box-shadow: 0 2px 0 rgba(0,0,0,.1), inset 0 1px 0 rgba(255,255,255,.3);
     }
 
-    .cell.mine-hit {
-      background: var(--danger);
-      box-shadow: none;
-    }
+    .cell.mine      { background: var(--danger-dim); box-shadow: none; }
+    .cell.mine-hit  { background: var(--danger);     box-shadow: none; }
+    .cell.wrong-flag{ background: var(--danger-dim); box-shadow: none; }
 
-    .cell.wrong-flag {
-      background: var(--danger-dim);
-      box-shadow: none;
-    }
-
-    .cell.n1 { color: #5b9cf6; }
-    .cell.n2 { color: #48bb78; }
-    .cell.n3 { color: #f66b6b; }
-    .cell.n4 { color: #9f7aea; }
-    .cell.n5 { color: #ed8936; }
-    .cell.n6 { color: #38b2ac; }
-    .cell.n7 { color: #ec4899; }
-    .cell.n8 { color: #a0aec0; }
+    /* Classic number colours, adjusted for warm background */
+    .cell.n1 { color: #1055b0; }
+    .cell.n2 { color: #276f38; }
+    .cell.n3 { color: #c02020; }
+    .cell.n4 { color: #5c1a8a; }
+    .cell.n5 { color: #b03000; }
+    .cell.n6 { color: #10706a; }
+    .cell.n7 { color: #7a0050; }
+    .cell.n8 { color: #556070; }
 
     /* ── Hint ──────────────────────────────────────────────────────── */
 
@@ -332,7 +321,7 @@
     .overlay {
       position: fixed;
       inset: 0;
-      background: rgba(238,234,255,.7);
+      background: rgba(253,240,208,.72);
       backdrop-filter: blur(8px);
       -webkit-backdrop-filter: blur(8px);
       display: flex;
@@ -358,9 +347,9 @@
       gap: .6rem;
     }
 
-    .ov-emoji  { font-size: 3.5rem; line-height: 1; }
-    .ov-title  { font-size: 1.4rem; font-weight: 800; color: var(--text); }
-    .ov-sub    { font-size: .9rem; color: var(--muted); }
+    .ov-emoji { font-size: 3.5rem; line-height: 1; }
+    .ov-title { font-size: 1.4rem; font-weight: 800; }
+    .ov-sub   { font-size: .9rem; color: var(--muted); }
 
     .ov-btn {
       margin-top: .5rem;
@@ -372,7 +361,6 @@
       font-size: 1rem;
       font-weight: 700;
       cursor: pointer;
-      letter-spacing: .04em;
       transition: opacity .15s;
     }
 
@@ -449,7 +437,7 @@
     { rows: 9,  cols: 9,  mines: 10 },
     { rows: 12, cols: 12, mines: 25 },
     { rows: 16, cols: 16, mines: 50 },
-    null, // custom
+    null, // custom — waits for Play button
   ];
 
   let rows, cols, mineCount;
@@ -458,6 +446,16 @@
   let timerVal, timerInterval;
   let mode = 'dig';
   let currentLevel = 0;
+
+  // ── Viewport: scale so the grid always fills the screen at default zoom ─────
+
+  function setViewport() {
+    const gap = 3, bodyPad = 32, cardPad = 32;
+    const cellNat = 38;
+    const w = Math.max(cols * cellNat + (cols - 1) * gap + bodyPad + cardPad, 320);
+    document.getElementById('vp').content =
+      `width=${w}, minimum-scale=0.2, maximum-scale=8.0`;
+  }
 
   // ── Init ────────────────────────────────────────────────────────────────────
 
@@ -478,6 +476,7 @@
     document.getElementById('overlay').classList.remove('show');
 
     setMode('dig');
+    setViewport();
     setCellSize();
     buildGrid();
   }
@@ -496,7 +495,6 @@
 
     shuffle(cells);
     const actual = Math.min(mineCount, cells.length);
-
     for (let i = 0; i < actual; i++) board[cells[i][0]][cells[i][1]] = -1;
 
     for (let r = 0; r < rows; r++)
@@ -603,9 +601,12 @@
   // ── DOM ────────────────────────────────────────────────────────────────────
 
   function setCellSize() {
-    const gap = 3, pad16 = 32;
-    const avail = Math.min(window.innerWidth - pad16, 460 - pad16);
-    const size = Math.max(Math.floor((avail - (cols - 1) * gap) / cols), 20);
+    const gap = 3, pad = 64;
+    const avail = window.innerWidth - pad;
+    const size = Math.min(
+      Math.max(Math.floor((avail - (cols - 1) * gap) / cols), 20),
+      56
+    );
     document.documentElement.style.setProperty('--cell-size', size + 'px');
   }
 
@@ -640,11 +641,13 @@
 
     el.addEventListener('click', () => {
       if (longPressHandled) { longPressHandled = false; return; }
-      if (mode === 'flag')         toggleFlag(r, c);
-      else if (revealed[r][c])     chordReveal(r, c);
-      else                         reveal(r, c);
+      if (mode === 'flag')        toggleFlag(r, c);
+      else if (revealed[r][c])    chordReveal(r, c);
+      else                        reveal(r, c);
     });
 
+    // On Android, contextmenu fires after the long-press timeout already ran —
+    // guard to avoid double-toggle.
     el.addEventListener('contextmenu', (e) => {
       e.preventDefault();
       if (!longPressHandled) toggleFlag(r, c);
@@ -740,7 +743,6 @@
     const panel = document.getElementById('custom-panel');
     if (idx === 3) {
       panel.classList.add('open');
-      // don't start game yet — wait for custom-play
     } else {
       panel.classList.remove('open');
       const lv = LEVELS[idx];
@@ -748,7 +750,6 @@
     }
   }
 
-  // Boot
   startLevel(0);
 </script>
 </body>
