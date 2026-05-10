@@ -453,8 +453,9 @@
     const gap = 3, bodyPad = 32, cardPad = 32;
     const cellNat = 38;
     const w = Math.max(cols * cellNat + (cols - 1) * gap + bodyPad + cardPad, 320);
+    // initial-scale=1.0 forces the browser to reset any user zoom
     document.getElementById('vp').content =
-      `width=${w}, minimum-scale=0.2, maximum-scale=8.0`;
+      `width=${w}, initial-scale=1.0, minimum-scale=0.2, maximum-scale=8.0`;
   }
 
   // ── Init ────────────────────────────────────────────────────────────────────
@@ -566,6 +567,7 @@
     document.getElementById('reset').textContent = won ? '😎' : '😵';
 
     if (!won) {
+      setViewport(); // reset zoom so the full board reveal is visible
       for (let r = 0; r < rows; r++)
         for (let c = 0; c < cols; c++) {
           const el = getCell(r, c);
@@ -713,8 +715,14 @@
 
   // ── Bindings ───────────────────────────────────────────────────────────────
 
-  document.getElementById('reset').addEventListener('click', () => startLevel(currentLevel));
-  document.getElementById('ov-btn').addEventListener('click', () => startLevel(currentLevel));
+  function replay() {
+    // In custom mode there's no LEVELS entry — restart with current dimensions.
+    if (currentLevel === 3) initGame(rows, cols, mineCount);
+    else startLevel(currentLevel);
+  }
+
+  document.getElementById('reset').addEventListener('click', replay);
+  document.getElementById('ov-btn').addEventListener('click', replay);
   document.getElementById('dig-btn').addEventListener('click', () => setMode('dig'));
   document.getElementById('flag-btn').addEventListener('click', () => setMode('flag'));
 
