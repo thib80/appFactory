@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 set -euo pipefail
 
 cfg() { grep "^$1:" config.yaml | awk '{print $2}'; }
