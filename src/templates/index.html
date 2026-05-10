@@ -173,6 +173,7 @@
       border: 1px solid var(--border);
       transition: background 0.08s;
       touch-action: manipulation;
+      -webkit-touch-callout: none;
     }
 
     .cell:not(.revealed):active { background: #2a2a4a; }
@@ -488,12 +489,12 @@
 
   function attachListeners(el, r, c) {
     let pressTimer = null;
-    let didLongPress = false;
+    let longPressHandled = false;
 
     el.addEventListener('touchstart', () => {
-      didLongPress = false;
+      longPressHandled = false;
       pressTimer = setTimeout(() => {
-        didLongPress = true;
+        longPressHandled = true;
         pressTimer = null;
         toggleFlag(r, c);
       }, 480);
@@ -507,11 +508,11 @@
     el.addEventListener('touchmove', () => {
       clearTimeout(pressTimer);
       pressTimer = null;
-      didLongPress = true; // suppress click after scroll
+      longPressHandled = true; // suppress click after scroll
     });
 
     el.addEventListener('click', () => {
-      if (didLongPress) { didLongPress = false; return; }
+      if (longPressHandled) { longPressHandled = false; return; }
       if (mode === 'flag') {
         toggleFlag(r, c);
       } else if (revealed[r][c]) {
@@ -521,9 +522,12 @@
       }
     });
 
+    // On Android, contextmenu fires after the long-press timeout already ran —
+    // skip toggleFlag to avoid double-toggle, but still prevent the browser menu.
     el.addEventListener('contextmenu', (e) => {
       e.preventDefault();
-      toggleFlag(r, c);
+      if (!longPressHandled) toggleFlag(r, c);
+      longPressHandled = false;
     });
   }
 
