@@ -324,9 +324,6 @@
       background: rgba(253,240,208,.72);
       backdrop-filter: blur(8px);
       -webkit-backdrop-filter: blur(8px);
-      display: flex;
-      align-items: center;
-      justify-content: center;
       z-index: 100;
       opacity: 0;
       pointer-events: none;
@@ -336,6 +333,10 @@
     .overlay.show { opacity: 1; pointer-events: all; }
 
     .overlay-card {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
       background: var(--card);
       border-radius: 24px;
       padding: 2rem 2.5rem;
@@ -588,7 +589,21 @@
     document.getElementById('ov-sub').textContent   = won
       ? `Cleared in ${timerVal}s`
       : 'Better luck next time';
-    setTimeout(() => document.getElementById('overlay').classList.add('show'), 350);
+    setTimeout(() => {
+      positionOverlayCard();
+      document.getElementById('overlay').classList.add('show');
+    }, 350);
+  }
+
+  function positionOverlayCard() {
+    const grid = document.getElementById('grid');
+    const card = document.querySelector('.overlay-card');
+    if (!grid || !card) return;
+    const rect = grid.getBoundingClientRect();
+    const cx = rect.left + rect.width  / 2;
+    const cy = rect.top  + rect.height / 2;
+    card.style.left = cx + 'px';
+    card.style.top  = cy + 'px';
   }
 
   // ── Timer ──────────────────────────────────────────────────────────────────
@@ -744,7 +759,11 @@
   window.addEventListener('resize', () => {
     setCellSize();
     document.getElementById('grid').style.gridTemplateColumns = `repeat(${cols}, var(--cell-size))`;
+    if (document.getElementById('overlay').classList.contains('show')) positionOverlayCard();
   });
+  window.addEventListener('scroll', () => {
+    if (document.getElementById('overlay').classList.contains('show')) positionOverlayCard();
+  }, { passive: true });
 
   function startLevel(idx) {
     currentLevel = idx;
